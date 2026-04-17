@@ -1,0 +1,6 @@
+{
+  "parent": "craftingcurrents:block/bi_straight_sig_bus_l0_r0",
+  "textures": {
+    "top": "craftingcurrents:block/bi_straight_l1_r1"
+  }
+}

@@ -1,0 +1,8 @@
+{
+  "variants": {
+    "facing=north": {"model": "craftingcurrents:block/directional_test_block"},
+    "facing=east": {"model":  "craftingcurrents:block/directional_test_block", "y": 90},
+    "facing=south": {"model": "craftingcurrents:block/directional_test_block", "y": 180 },
+    "facing=west": {"model":  "craftingcurrents:block/directional_test_block", "y": 270 }
+  }
+}
