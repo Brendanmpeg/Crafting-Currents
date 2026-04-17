@@ -12,6 +12,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
@@ -25,6 +26,11 @@ public class StraightSigBus extends Block {
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 
     /* Custom States */
+    public static final BooleanProperty NORTH_CONN = BlockStateProperties.NORTH;
+    public static final BooleanProperty SOUTH_CONN = BlockStateProperties.SOUTH;
+    public static final BooleanProperty EAST_CONN  = BlockStateProperties.EAST;
+    public static final BooleanProperty WEST_CONN  = BlockStateProperties.WEST;
+
     public static final BooleanProperty SIGNAL_1 = BooleanProperty.create("signal_1");
     private static final int PROPAGATION_DELAY = 1;
 

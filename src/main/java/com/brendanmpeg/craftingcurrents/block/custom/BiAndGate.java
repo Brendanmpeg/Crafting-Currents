@@ -1,5 +1,6 @@
 package com.brendanmpeg.craftingcurrents.block.custom;
 
+import com.brendanmpeg.craftingcurrents.utils.ModTags;
 import com.brendanmpeg.craftingcurrents.utils.RelativeDirections;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -91,9 +92,9 @@ public class BiAndGate extends Block {
 
         RelativeDirections relativePositions = new RelativeDirections(pos, state.getValue(FACING));
         BlockState rearNeighborState = level.getBlockState(relativePositions.rearNeighbor);
+        if (!isComponentBlock(rearNeighborState)) return;
 
-        if (rearNeighborState.hasProperty(SIGNAL_1) && rearNeighborState.hasProperty(SIGNAL_2) &&
-                rearNeighborState.getValue(FACING) == relativePositions.front) {
+        if (!isGateBlock(rearNeighborState) && rearNeighborState.getValue(FACING) == relativePositions.front) {
             boolean signal_1 = rearNeighborState.getValue(SIGNAL_1);
             boolean signal_2 = rearNeighborState.getValue(SIGNAL_2);
 
@@ -105,6 +106,15 @@ public class BiAndGate extends Block {
                 level.setBlock(pos, newState, 3);
             }
         }
+    }
+
+
+    private boolean isGateBlock(BlockState blockState) {
+        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_GATE);
+    }
+
+    private boolean isComponentBlock(BlockState blockState) {
+        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_COMPONENT);
     }
 
     // Register the properties Ex. FACING

@@ -39,7 +39,7 @@ public class ModBlocks {
 
     /* Block Declarations */
     public static final RegistryObject<Block> DIRECTIONAL_TEST_BLOCK = registerBlock("directional_test_block",
-            () -> new DirectionalTestBlock(BlockBehaviour.Properties.of().instabreak().lightLevel(s ->15)));
+            () -> new DirectionalTestBlock(BlockBehaviour.Properties.of().instabreak().lightLevel(s ->15).noLootTable()));
 
     public static final RegistryObject<Block> BI_STRAIGHT_SIG_BUS = registerBlock("bi_straight_sig_bus",
             () -> new BiStraightSigBus(BlockBehaviour.Properties.of().instabreak()));

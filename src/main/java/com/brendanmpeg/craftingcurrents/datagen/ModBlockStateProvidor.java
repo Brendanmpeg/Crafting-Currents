@@ -9,16 +9,17 @@ import net.minecraftforge.common.data.ExistingFileHelper;
 import net.minecraftforge.registries.RegistryObject;
 
 public class ModBlockStateProvidor extends BlockStateProvider {
-    public ModBlockStateProvidor(PackOutput output, String modid, ExistingFileHelper exFileHelper) {
+
+    public ModBlockStateProvidor(PackOutput output, ExistingFileHelper exFileHelper) {
         super(output, CraftingCurrents.MODID, exFileHelper);
     }
 
     @Override
     protected void registerStatesAndModels() {
-        blockWithItem(ModBlocks.BI_AND_GATE);
-        blockWithItem(ModBlocks.BI_OR_GATE);
-        blockWithItem(ModBlocks.STRAIGHT_SIG_BUS);
-        blockWithItem(ModBlocks.BI_STRAIGHT_SIG_BUS);
+//        blockWithItem(ModBlocks.BI_AND_GATE);
+//        blockWithItem(ModBlocks.BI_OR_GATE);
+//        blockWithItem(ModBlocks.STRAIGHT_SIG_BUS);
+//        blockWithItem(ModBlocks.BI_STRAIGHT_SIG_BUS);
     }
 
     private void blockWithItem(RegistryObject<Block> blockRegistryObject){
