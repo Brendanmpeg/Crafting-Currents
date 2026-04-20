@@ -101,9 +101,15 @@ public class BiOrGate extends Block {
                 BlockState newState = state
                         .setValue(SIGNAL_1, signal_1)
                         .setValue(SIGNAL_2, signal_2)
-                        .setValue(SIGNAL_OUT, signal_1 & signal_2);
+                        .setValue(SIGNAL_OUT, signal_1 | signal_2);
                 level.setBlock(pos, newState, 3);
             }
+        } else {
+            BlockState newState = state
+                    .setValue(SIGNAL_1, false)
+                    .setValue(SIGNAL_2, false)
+                    .setValue(SIGNAL_OUT, false);
+            level.setBlock(pos, newState, 3);
         }
     }
 

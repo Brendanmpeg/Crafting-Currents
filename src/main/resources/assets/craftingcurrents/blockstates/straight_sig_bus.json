@@ -1,15 +1,3 @@
 {
-  "variants": {
-    "facing=north,signal_1=false": { "model": "craftingcurrents:block/straight_sig_bus_off" },
-    "facing=north,signal_1=true":  { "model": "craftingcurrents:block/straight_sig_bus_on" },
 
-    "facing=east,signal_1=false": { "model": "craftingcurrents:block/straight_sig_bus_off", "y": 90 },
-    "facing=east,signal_1=true":  { "model": "craftingcurrents:block/straight_sig_bus_on", "y": 90 },
-
-    "facing=south,signal_1=false": { "model": "craftingcurrents:block/straight_sig_bus_off", "y": 180 },
-    "facing=south,signal_1=true":  { "model": "craftingcurrents:block/straight_sig_bus_on", "y": 180 },
-
-    "facing=west,signal_1=false":  { "model": "craftingcurrents:block/straight_sig_bus_off", "y": 270 },
-    "facing=west,signal_1=true":   { "model": "craftingcurrents:block/straight_sig_bus_on", "y": 270 }
-  }
 }
