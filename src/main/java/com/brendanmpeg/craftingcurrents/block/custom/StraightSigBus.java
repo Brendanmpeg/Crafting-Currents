@@ -1,6 +1,8 @@
 package com.brendanmpeg.craftingcurrents.block.custom;
 
+import com.brendanmpeg.craftingcurrents.utils.ModTags;
 import com.brendanmpeg.craftingcurrents.utils.RelativeDirections;
+import com.brendanmpeg.craftingcurrents.utils.SignalBusConnections;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -12,9 +14,9 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
@@ -22,23 +24,20 @@ import net.minecraft.world.ticks.TickPriority;
 public class StraightSigBus extends Block {
 
     /* Minecraft States */
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 
     /* Custom States */
-    public static final BooleanProperty NORTH_CONN = BlockStateProperties.NORTH;
-    public static final BooleanProperty SOUTH_CONN = BlockStateProperties.SOUTH;
-    public static final BooleanProperty EAST_CONN  = BlockStateProperties.EAST;
-    public static final BooleanProperty WEST_CONN  = BlockStateProperties.WEST;
+    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public static final BooleanProperty SIGNAL_1 = BooleanProperty.create("signal_1");
+    public static final EnumProperty<SignalBusConnections> CONN = EnumProperty.create("my_property", SignalBusConnections.class);
     private static final int PROPAGATION_DELAY = 1;
+
 
     //class constructor to set the default states
     public StraightSigBus(Properties properties) {
         super (properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH)
-                .setValue(SIGNAL_1, false));
+        this.registerDefaultState(this.defaultBlockState().setValue(SIGNAL_1, false).setValue(CONN, SignalBusConnections.NA));
     }
 
     /* Shaping functions */
@@ -48,6 +47,83 @@ public class StraightSigBus extends Block {
     }
 
     /* Logical functions */
+    public void getConn(BlockState blockState, BlockPos blockPos, Level level) {
+        SignalBusConnections connection = blockState.getValue(CONN);
+        BlockState southState = level.getBlockState(blockPos.south());
+        BlockState northState = level.getBlockState(blockPos.north());
+        BlockState eastState = level.getBlockState(blockPos.east());
+        BlockState westState = level.getBlockState(blockPos.west());
+
+        if (connection.equals(SignalBusConnections.NA)) {
+            if (isCompatibleBlock(blockPos, southState, blockPos.south()) && isCompatibleBlock(blockPos, eastState, blockPos.east())) {
+                System.out.println("Establishing a South East connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.SE), 3);
+            } else if (isCompatibleBlock(blockPos, southState, blockPos.south()) && isCompatibleBlock(blockPos, westState, blockPos.west())) {
+                System.out.println("Establishing a South West connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.SW), 3);
+            } else if (isCompatibleBlock(blockPos, northState, blockPos.north()) && isCompatibleBlock(blockPos, eastState, blockPos.east())) {
+                System.out.println("Establishing a North East connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NE), 3);
+            } else if (isCompatibleBlock(blockPos, northState, blockPos.north()) && isCompatibleBlock(blockPos, westState, blockPos.west())) {
+                System.out.println("Establishing a North West connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NW), 3);
+            } else if (isCompatibleBlock(blockPos, northState, blockPos.north()) && isCompatibleBlock(blockPos, southState, blockPos.south())) {
+                System.out.println("Establishing a North South connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NS), 3);
+            } else if (isCompatibleBlock(blockPos, eastState, blockPos.east()) && isCompatibleBlock(blockPos, westState, blockPos.west())) {
+                System.out.println("Establishing a East West connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NS), 3);
+            }
+        } else if (connection.equals(SignalBusConnections.SE)) {
+            if (!isCompatibleBlock(blockPos, southState, blockPos.south()) || !isCompatibleBlock(blockPos, eastState, blockPos.east())) {
+                System.out.println("Removing a South East connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NA), 3);
+            }
+        } else if (connection.equals(SignalBusConnections.SW)) {
+            if (!isCompatibleBlock(blockPos, southState, blockPos.south()) || !isCompatibleBlock(blockPos, westState, blockPos.west())) {
+                System.out.println("Removing a South West connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NA), 3);
+            }
+        } else if (connection.equals(SignalBusConnections.NE)) {
+            if (!isCompatibleBlock(blockPos, northState, blockPos.north()) || !isCompatibleBlock(blockPos, eastState, blockPos.east())) {
+                System.out.println("Removing a North East connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NA), 3);
+            }
+        } else if (connection.equals(SignalBusConnections.NW)) {
+            if (!isCompatibleBlock(blockPos, northState, blockPos.north()) || !isCompatibleBlock(blockPos, westState, blockPos.west())) {
+                System.out.println("Removing a South East connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NA), 3);
+            }
+        } else if (connection.equals(SignalBusConnections.NS)) {
+
+            if (!isCompatibleBlock(blockPos, northState, blockPos.north()) || !isCompatibleBlock(blockPos, southState, blockPos.south())) {
+                System.out.println("Removing a North South connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NA), 3);
+            }
+        } else if (connection.equals(SignalBusConnections.EW)) {
+            if (!isCompatibleBlock(blockPos, eastState, blockPos.east()) || !isCompatibleBlock(blockPos, westState, blockPos.west())) {
+                System.out.println("Removing a East West connection");
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NA), 3);
+            }
+        }
+    }
+
+    private boolean isCompatibleBlock(BlockPos blockPos, BlockState neighborState, BlockPos neighborPos) {
+        if (!isComponentBlock(neighborState)) return false;
+        if (neighborState.getBlock() instanceof StraightSigBus) return true;
+        if (isGateBlock(neighborState) && neighborPos.relative(neighborState.getValue(FACING)).equals(blockPos)) return true;
+
+        return false;
+    }
+
+    private boolean isComponentBlock(BlockState blockState) {
+        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_COMPONENT);
+    }
+
+    private boolean isGateBlock(BlockState blockState) {
+        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_GATE);
+    }
+
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context){
         Direction facingDirection = context.getHorizontalDirection();
@@ -63,9 +139,7 @@ public class StraightSigBus extends Block {
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
-        System.out.println("New State: " + newState);
         if (!level.isClientSide && !newState.is(this)) {
-            System.out.println("New State block entered ");
             // Notify the block directly in front that we're gone
             RelativeDirections relativeDirections = new RelativeDirections(pos, state.getValue(FACING));
             level.neighborChanged(relativeDirections.frontNeighbor,this, pos);
@@ -78,15 +152,8 @@ public class StraightSigBus extends Block {
         if (level.isClientSide) return;
 
         RelativeDirections relativePositions = new RelativeDirections(pos, state.getValue(FACING));
-        BlockState NeighborState = level.getBlockState(neighborPos);
-
-        /* signal transfer logic */
-        if (NeighborState.hasProperty(SIGNAL_1))
-        {
-            // Move this to tick
-            System.out.println("Rear neighbor");
-            level.scheduleTick(pos, this, PROPAGATION_DELAY);
-        }
+        BlockState neighborState = level.getBlockState(neighborPos);
+        getConn(state, pos, level);
     }
 
     @Override
@@ -98,6 +165,7 @@ public class StraightSigBus extends Block {
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(FACING)
-                .add(SIGNAL_1);
+                .add(SIGNAL_1)
+                .add(CONN);
     }
 }
