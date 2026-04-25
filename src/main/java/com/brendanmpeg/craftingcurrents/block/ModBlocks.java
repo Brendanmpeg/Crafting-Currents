@@ -2,7 +2,6 @@ package com.brendanmpeg.craftingcurrents.block;
 
 import com.brendanmpeg.craftingcurrents.CraftingCurrents;
 import com.brendanmpeg.craftingcurrents.block.custom.*;
-import com.brendanmpeg.craftingcurrents.block.custom.*;
 import com.brendanmpeg.craftingcurrents.item.ModItems;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
@@ -41,11 +40,11 @@ public class ModBlocks {
     public static final RegistryObject<Block> DIRECTIONAL_TEST_BLOCK = registerBlock("directional_test_block",
             () -> new DirectionalTestBlock(BlockBehaviour.Properties.of().instabreak().lightLevel(s ->15).noLootTable()));
 
-    public static final RegistryObject<Block> BI_STRAIGHT_SIG_BUS = registerBlock("bi_straight_sig_bus",
-            () -> new BiStraightSigBus(BlockBehaviour.Properties.of().instabreak()));
+    public static final RegistryObject<Block> BI_SIG_BUS = registerBlock("bi_sig_bus",
+            () -> new BiSigBus(BlockBehaviour.Properties.of().instabreak()));
 
-    public static final RegistryObject<Block> STRAIGHT_SIG_BUS = registerBlock("straight_sig_bus",
-            () -> new StraightSigBus(BlockBehaviour.Properties.of().instabreak()));
+    public static final RegistryObject<Block> MONO_SIG_BUS = registerBlock("mono_sig_bus",
+            () -> new MonoSigBus(BlockBehaviour.Properties.of().instabreak()));
 
     public static final RegistryObject<Block> BI_AND_GATE = registerBlock("bi_and_gate",
             () -> new BiAndGate(BlockBehaviour.Properties.of().instabreak()));

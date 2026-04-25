@@ -21,8 +21,8 @@ public class ModBlocksTagGenerator extends BlockTagsProvider {
         this.tag(ModTags.Blocks.CRAFTING_CURRENTS_COMPONENT)
                 .add(ModBlocks.BI_AND_GATE.get())
                 .add(ModBlocks.BI_OR_GATE.get())
-                .add(ModBlocks.BI_STRAIGHT_SIG_BUS.get())
-                .add(ModBlocks.STRAIGHT_SIG_BUS.get());
+                .add(ModBlocks.BI_SIG_BUS.get())
+                .add(ModBlocks.MONO_SIG_BUS.get());
         this.tag(ModTags.Blocks.CRAFTING_CURRENTS_GATE)
                 .add(ModBlocks.BI_OR_GATE.get())
                 .add(ModBlocks.BI_AND_GATE.get());

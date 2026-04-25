@@ -19,7 +19,7 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
 
-public class BiStraightSigBus extends Block {
+public class BiSigBus extends Block {
 
     /* Minecraft States */
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
@@ -31,7 +31,7 @@ public class BiStraightSigBus extends Block {
     private static final int PROPAGATION_DELAY = 1;
 
     //class constructor to set the default states
-    public BiStraightSigBus(Properties properties) {
+    public BiSigBus(Properties properties) {
         super (properties);
         this.registerDefaultState(this.defaultBlockState().setValue(FACING, Direction.NORTH)
                 .setValue(SIGNAL_1, false)
@@ -104,7 +104,7 @@ public class BiStraightSigBus extends Block {
         boolean leftSignal = level.getSignal(pos.relative(relativePositions.left), relativePositions.left) > 0;
         boolean rightSignal = level.getSignal(pos.relative(relativePositions.right), relativePositions.right) > 0;
 
-        if (rearNeighborState.is(ModBlocks.BI_STRAIGHT_SIG_BUS.get()) &&
+        if (rearNeighborState.is(ModBlocks.BI_SIG_BUS.get()) &&
                 rearNeighborState.getValue(FACING) == relativePositions.front) {
             boolean signal_1 = rearNeighborState.getValue(SIGNAL_1);
             boolean signal_2 = rearNeighborState.getValue(SIGNAL_2);

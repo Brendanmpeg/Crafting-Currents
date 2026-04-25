@@ -2,9 +2,7 @@ package com.brendanmpeg.craftingcurrents.datagen.loot;
 
 import com.brendanmpeg.craftingcurrents.block.ModBlocks;
 import net.minecraft.data.loot.BlockLootSubProvider;
-import net.minecraft.world.flag.FeatureFlagSet;
 import net.minecraft.world.flag.FeatureFlags;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraftforge.registries.RegistryObject;
 
@@ -17,8 +15,8 @@ public class ModBlockLootTables extends BlockLootSubProvider {
 
     @Override
     protected void generate() {
-        this.dropSelf(ModBlocks.BI_STRAIGHT_SIG_BUS.get());
-        this.dropSelf(ModBlocks.STRAIGHT_SIG_BUS.get());
+        this.dropSelf(ModBlocks.BI_SIG_BUS.get());
+        this.dropSelf(ModBlocks.MONO_SIG_BUS.get());
         this.dropSelf(ModBlocks.BI_AND_GATE.get());
         this.dropSelf(ModBlocks.BI_OR_GATE.get());
         //this.add(ModBlocks.ORE.get(), block -> createXOreDrops());

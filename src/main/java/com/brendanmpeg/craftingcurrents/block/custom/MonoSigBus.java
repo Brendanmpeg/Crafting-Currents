@@ -21,13 +21,15 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
 
-public class StraightSigBus extends Block {
+import static com.brendanmpeg.craftingcurrents.block.custom.BiOrGate.FACING;
+
+
+public class MonoSigBus extends Block {
 
     /* Minecraft States */
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
 
     /* Custom States */
-    public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
 
     public static final BooleanProperty SIGNAL_1 = BooleanProperty.create("signal_1");
     public static final EnumProperty<SignalBusConnections> CONN = EnumProperty.create("my_property", SignalBusConnections.class);
@@ -35,7 +37,7 @@ public class StraightSigBus extends Block {
 
 
     //class constructor to set the default states
-    public StraightSigBus(Properties properties) {
+    public MonoSigBus(Properties properties) {
         super (properties);
         this.registerDefaultState(this.defaultBlockState().setValue(SIGNAL_1, false).setValue(CONN, SignalBusConnections.NA));
     }
@@ -72,7 +74,7 @@ public class StraightSigBus extends Block {
                 level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NS), 3);
             } else if (isCompatibleBlock(blockPos, eastState, blockPos.east()) && isCompatibleBlock(blockPos, westState, blockPos.west())) {
                 System.out.println("Establishing a East West connection");
-                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.NS), 3);
+                level.setBlock(blockPos, blockState.setValue(CONN, SignalBusConnections.EW), 3);
             }
         } else if (connection.equals(SignalBusConnections.SE)) {
             if (!isCompatibleBlock(blockPos, southState, blockPos.south()) || !isCompatibleBlock(blockPos, eastState, blockPos.east())) {
@@ -110,7 +112,7 @@ public class StraightSigBus extends Block {
 
     private boolean isCompatibleBlock(BlockPos blockPos, BlockState neighborState, BlockPos neighborPos) {
         if (!isComponentBlock(neighborState)) return false;
-        if (neighborState.getBlock() instanceof StraightSigBus) return true;
+        if (neighborState.getBlock() instanceof MonoSigBus) return true;
         if (isGateBlock(neighborState) && neighborPos.relative(neighborState.getValue(FACING)).equals(blockPos)) return true;
 
         return false;
@@ -127,8 +129,7 @@ public class StraightSigBus extends Block {
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context){
         Direction facingDirection = context.getHorizontalDirection();
-        return this.defaultBlockState().setValue(FACING, facingDirection)
-                .setValue(SIGNAL_1, false);
+        return this.defaultBlockState().setValue(SIGNAL_1, false);
     }
 
     @Override
@@ -141,7 +142,7 @@ public class StraightSigBus extends Block {
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide && !newState.is(this)) {
             // Notify the block directly in front that we're gone
-            RelativeDirections relativeDirections = new RelativeDirections(pos, state.getValue(FACING));
+            RelativeDirections relativeDirections = new RelativeDirections(pos, Direction.NORTH);
             level.neighborChanged(relativeDirections.frontNeighbor,this, pos);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
@@ -151,7 +152,7 @@ public class StraightSigBus extends Block {
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
         if (level.isClientSide) return;
 
-        RelativeDirections relativePositions = new RelativeDirections(pos, state.getValue(FACING));
+        RelativeDirections relativePositions = new RelativeDirections(pos, Direction.NORTH);
         BlockState neighborState = level.getBlockState(neighborPos);
         getConn(state, pos, level);
     }
@@ -164,8 +165,7 @@ public class StraightSigBus extends Block {
     // Register the properties Ex. FACING
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
-        builder.add(FACING)
-                .add(SIGNAL_1)
+        builder.add(SIGNAL_1)
                 .add(CONN);
     }
 }

@@ -7,7 +7,6 @@ import com.brendanmpeg.craftingcurrents.item.ModItems;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.CreativeModeTabs;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.registries.DeferredRegister;
 import net.minecraftforge.registries.RegistryObject;
@@ -30,9 +29,9 @@ public class ModCreativeModeTabs {
 
                         // Add your blocks here — the BlockItem is what goes in the tab
                         output.accept(ModBlocks.DIRECTIONAL_TEST_BLOCK.get());
-                        output.accept(ModBlocks.BI_STRAIGHT_SIG_BUS.get());
+                        output.accept(ModBlocks.BI_SIG_BUS.get());
                         output.accept(ModBlocks.BI_AND_GATE.get());
-                        output.accept(ModBlocks.STRAIGHT_SIG_BUS.get());
+                        output.accept(ModBlocks.MONO_SIG_BUS.get());
                         output.accept(ModBlocks.BI_OR_GATE.get());
 
                     }).build());
