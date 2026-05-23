@@ -1,7 +1,7 @@
 {
   "parent": "minecraft:block/block",
   "textures": {
-    "base":    "craftingcurrents:block/straight_sig_bus_off",
+    "base":    "craftingcurrents:block/mono_sig_bus_off",
     "particle": "craftingcurrents:block/directional_test_block_side"
   },
   "elements": [

@@ -3,8 +3,8 @@
   "item.craftingcurrents.base_plate": "Base Plate",
 
   "block.craftingcurrents.directional_test_block": "Directional Test Block",
-  "block.craftingcurrents.bi_straight_sig_bus": "Straight Bi Signal Bus",
-  "block.craftingcurrents.straight_sig_bus": "Straight Signal Bus",
+  "block.craftingcurrents.bi_sig_bus": "Bi Signal Bus",
+  "block.craftingcurrents.mono_sig_bus": "Signal Bus",
   "block.craftingcurrents.bi_and_gate": "Bi And Gate",
   "block.craftingcurrents.bi_or_gate": "Bi Or Gate",
 
