@@ -2,7 +2,7 @@
   "parent": "minecraft:block/cube_bottom_top",
   "textures": {
     "top":    "craftingcurrents:block/directional_test_block",
-    "bottom": "craftingcurrents:block/workbench",
+    "bottom": "craftingcurrents:block/base_plate",
     "side":   "craftingcurrents:block/directional_test_block_side"
   }
 }

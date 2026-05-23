@@ -3,7 +3,7 @@
   "textures": {
     "top":    "craftingcurrents:block/bi_or_gate_l0_r0",
     "side":   "craftingcurrents:block/directional_test_block_side",
-    "bottom": "craftingcurrents:block/workbench",
+    "bottom": "craftingcurrents:block/base_plate",
     "particle": "craftingcurrents:block/directional_test_block_side"
   },
   "elements": [

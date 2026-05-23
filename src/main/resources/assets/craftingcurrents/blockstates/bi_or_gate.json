@@ -1,6 +1,6 @@
 {
   "variants": {
-    "facing=north,signal_1=false,signal_2=false": { "model": "craftingcurrentscraftingcurrentsblock/bi_or_gate_l0_r0" },
+    "facing=north,signal_1=false,signal_2=false": { "model": "craftingcurrents:block/bi_or_gate_l0_r0" },
     "facing=north,signal_1=false,signal_2=true":  { "model": "craftingcurrents:block/bi_or_gate_l0_r1" },
     "facing=north,signal_1=true,signal_2=false":  { "model": "craftingcurrents:block/bi_or_gate_l1_r0" },
     "facing=north,signal_1=true,signal_2=true":   { "model": "craftingcurrents:block/bi_or_gate_l1_r1" },
