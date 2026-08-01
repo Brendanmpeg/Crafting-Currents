@@ -26,3 +26,4 @@ forge*changelog.txt
 
 # Generated Resources
 src/generated
+/run-data/logs
