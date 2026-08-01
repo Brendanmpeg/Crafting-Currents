@@ -12,6 +12,7 @@ import net.minecraftforge.registries.ForgeRegistries;
 import net.minecraftforge.registries.RegistryObject;
 
 public class ModBlockStateProvidor extends BlockStateProvider {
+    private record CornerCase(Direction conn1, Direction conn2, int rotation) {}
 
     public ModBlockStateProvidor(PackOutput output, ExistingFileHelper exFileHelper) {
         super(output, CraftingCurrents.MODID, exFileHelper);
@@ -54,31 +55,31 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             builder.part()
                     .modelFile(straight).rotationY(0).addModel()
                     .condition(MonoSigBus.SIGNAL_1, signal)
-                    .condition(MonoSigBus.CONN1, 0)
+                    .condition(MonoSigBus.CONN1,  Direction.DOWN)
                     .end();
 
             // ── CONN1 != 0, CONN2 = 0 (single arm) ───────────────────────────
             // N(1) or S(3) → Y=0
-            for (int c1 : new int[]{1, 3}) {
+            for (Direction c1 : new Direction[]{Direction.NORTH, Direction.SOUTH}) {
                 builder.part()
                         .modelFile(straight).rotationY(0).addModel()
                         .condition(MonoSigBus.SIGNAL_1, signal)
                         .condition(MonoSigBus.CONN1, c1)
-                        .condition(MonoSigBus.CONN2, 0)
+                        .condition(MonoSigBus.CONN2, Direction.DOWN)
                         .end();
             }
             // E(2) or W(4) → Y=90
-            for (int c1 : new int[]{2, 4}) {
+            for (Direction c1 : new Direction[]{Direction.EAST, Direction.WEST}) {
                 builder.part()
                         .modelFile(straight).rotationY(90).addModel()
                         .condition(MonoSigBus.SIGNAL_1, signal)
                         .condition(MonoSigBus.CONN1, c1)
-                        .condition(MonoSigBus.CONN2, 0)
+                        .condition(MonoSigBus.CONN2, Direction.DOWN)
                         .end();
             }
 
             // ── Both connected, same plane (straight) ─────────────────────────
-            for (int[] pair : new int[][]{{1, 3}, {3, 1}}) {
+            for (Direction[] pair : new Direction[][]{{Direction.NORTH, Direction.SOUTH}, {Direction.SOUTH, Direction.NORTH}}) {
                 builder.part()
                         .modelFile(straight).rotationY(0).addModel()
                         .condition(MonoSigBus.SIGNAL_1, signal)
@@ -86,7 +87,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
                         .condition(MonoSigBus.CONN2, pair[1])
                         .end();
             }
-            for (int[] pair : new int[][]{{2, 4}, {4, 2}}) {
+            for (Direction[] pair : new Direction[][]{{Direction.EAST, Direction.WEST}, {Direction.WEST, Direction.EAST}}) {
                 builder.part()
                         .modelFile(straight).rotationY(90).addModel()
                         .condition(MonoSigBus.SIGNAL_1, signal)
@@ -96,22 +97,22 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             }
 
             // ── Both connected, different planes (corner) ─────────────────────
-            int[][] cornerCases = {
-                    {1, 2,   270},
-                    {2, 1,   270},
-                    {2, 3,  0},
-                    {3, 2,  0},
-                    {3, 4, 90},
-                    {4, 3, 90},
-                    {4, 1, 180},
-                    {1, 4, 180},
+            CornerCase[] cornerCases = {
+                    new CornerCase(Direction.NORTH, Direction.EAST,  270),
+                    new CornerCase(Direction.EAST,  Direction.NORTH, 270),
+                    new CornerCase(Direction.EAST,  Direction.SOUTH,   0),
+                    new CornerCase(Direction.SOUTH, Direction.EAST,    0),
+                    new CornerCase(Direction.SOUTH, Direction.WEST,   90),
+                    new CornerCase(Direction.WEST,  Direction.SOUTH,  90),
+                    new CornerCase(Direction.WEST,  Direction.NORTH, 180),
+                    new CornerCase(Direction.NORTH, Direction.WEST,  180),
             };
-            for (int[] c : cornerCases) {
+            for (CornerCase c : cornerCases) {
                 builder.part()
-                        .modelFile(corner).rotationY(c[2]).addModel()
+                        .modelFile(corner).rotationY(c.rotation).addModel()
                         .condition(MonoSigBus.SIGNAL_1, signal)
-                        .condition(MonoSigBus.CONN1, c[0])
-                        .condition(MonoSigBus.CONN2, c[1])
+                        .condition(MonoSigBus.CONN1, c.conn1)
+                        .condition(MonoSigBus.CONN2, c.conn2)
                         .end();
             }
         }

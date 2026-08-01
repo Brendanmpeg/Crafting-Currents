@@ -1,8 +1,7 @@
 package com.brendanmpeg.craftingcurrents.block.custom;
 
-import com.brendanmpeg.craftingcurrents.utils.ModTags;
+import com.brendanmpeg.craftingcurrents.utils.Codex;
 import com.brendanmpeg.craftingcurrents.utils.RelativeDirections;
-import com.brendanmpeg.craftingcurrents.utils.SignalBusConnections;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -11,25 +10,23 @@ import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
-import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraft.world.ticks.TickPriority;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-
 import static com.brendanmpeg.craftingcurrents.block.custom.BiOrGate.FACING;
+import static com.brendanmpeg.craftingcurrents.block.custom.BiOrGate.SIGNAL_OUT;
 
 
 public class MonoSigBus extends Block {
+
+    /* Static Globals */
+    Codex codex = new Codex();
 
     /* Minecraft States */
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
@@ -37,17 +34,17 @@ public class MonoSigBus extends Block {
     /* Custom States */
 
     public static final BooleanProperty SIGNAL_1 = BooleanProperty.create("signal_1");
-//    public static final EnumProperty<SignalBusConnections> CONN = EnumProperty.create("my_property", SignalBusConnections.class);
-public static final IntegerProperty CONN = IntegerProperty.create("conn",0, 12);
-    public static final IntegerProperty CONN1 = IntegerProperty.create("conn1",0, 4);
-    public static final IntegerProperty CONN2 = IntegerProperty.create("conn2",0, 4);
+    public static final BooleanProperty ISSOURCE = BooleanProperty.create("is_source");
+    public static final IntegerProperty POWERSOURCES = IntegerProperty.create("power_sources",0, 2);
+    public static final DirectionProperty CONN1 = DirectionProperty.create("conn1", Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN);
+    public static final DirectionProperty CONN2 = DirectionProperty.create("conn2", Direction.NORTH, Direction.SOUTH, Direction.EAST, Direction.WEST, Direction.DOWN);
     private static final int PROPAGATION_DELAY = 1;
 
 
     //class constructor to set the default states
     public MonoSigBus(Properties properties) {
         super (properties);
-        this.registerDefaultState(this.defaultBlockState().setValue(SIGNAL_1, false).setValue(CONN, 0));
+        this.registerDefaultState(this.defaultBlockState().setValue(SIGNAL_1, false).setValue(POWERSOURCES, 0));
     }
 
     /* Shaping functions */
@@ -57,111 +54,177 @@ public static final IntegerProperty CONN = IntegerProperty.create("conn",0, 12);
     }
 
     /* Logical functions */
-    public void getConn(BlockState blockState, BlockPos blockPos, Level level) {
-        Integer connection1 = blockState.getValue(CONN1);
-        Integer connection2 = blockState.getValue(CONN2);
+    private boolean iamConn(BlockPos blockPos, BlockPos neighborPos, Direction conn) {
+        return neighborPos.relative(conn).equals(blockPos);
+    }
+    private boolean iamConn(BlockState state, BlockState neighborState) {
+        if (state.getValue(CONN1).equals(neighborState.getValue(CONN1).getOpposite())){
+            return true;
+        } else if (state.getValue(CONN1).equals(neighborState.getValue(CONN2).getOpposite())) {
+            return true;
+        } else if (state.getValue(CONN2).equals(neighborState.getValue(CONN1).getOpposite())) {
+            return true;
+        } else if (state.getValue(CONN2).equals(neighborState.getValue(CONN2).getOpposite())) {
+            return true;
+        }
+        return false;
+    }
+
+
+
+    private BlockState[] getConnectedBlocks (BlockPos blockPos, BlockState blockState) {
+        BlockPos conn1 = blockPos.relative(blockState.getValue(CONN1));
+        BlockPos conn2 = blockPos.relative(blockState.getValue(CONN2));
+        return new BlockState[]{};
+    }
+
+    public BlockState isPowered(BlockState state, BlockState neighborState) {
+        BlockState newState = state;
+        if (codex.isGateBlock(neighborState)) {
+            if (neighborState.getValue(SIGNAL_OUT)) {
+                newState = newState.setValue(POWERSOURCES, state.getValue(POWERSOURCES) + 1).setValue(ISSOURCE, true);
+            } else {
+                if (state.getValue(POWERSOURCES) > 0 && state.getValue(ISSOURCE)) {
+                    newState = newState.setValue(POWERSOURCES, state.getValue(POWERSOURCES) - 1).setValue(ISSOURCE, false);
+                }
+                if (newState.getValue(POWERSOURCES) == 0 && state.getValue(SIGNAL_1)) {
+                    newState = newState.setValue(SIGNAL_1, false);
+                }
+            }
+        } else if (neighborState.getBlock() instanceof MonoSigBus) {
+            if (!iamConn(state,neighborState) && neighborState.getValue(CONN2) == Direction.DOWN) return newState;
+            if (!neighborState.getValue(POWERSOURCES).equals(state.getValue(POWERSOURCES))) {
+                newState = newState.setValue(POWERSOURCES, neighborState.getValue(POWERSOURCES));
+            }
+            if (newState.getValue(POWERSOURCES) == 0 && state.getValue(SIGNAL_1)) {
+                newState = newState.setValue(SIGNAL_1, false);
+            } else if (newState.getValue(POWERSOURCES) > 0 && !state.getValue(SIGNAL_1)) {
+                newState = newState.setValue(SIGNAL_1, true);
+            }
+        }
+        return newState;
+    }
+
+    public BlockState getNewConnections(BlockState blockState, BlockPos blockPos, Level level) {
+        blockState = checkConnections(blockState, blockPos, level);
+        Direction connection1 = blockState.getValue(CONN1);
+        Direction connection2 = blockState.getValue(CONN2);
         BlockState southState = level.getBlockState(blockPos.south());
         BlockState northState = level.getBlockState(blockPos.north());
         BlockState eastState = level.getBlockState(blockPos.east());
         BlockState westState = level.getBlockState(blockPos.west());
+        BlockState retstate = blockState;
 
-        if (connection1.equals(0)) {
+        if (connection1.equals(Direction.DOWN)) {
             if (isCompatibleBlock(blockPos, southState, blockPos.south())) {
-                level.setBlock(blockPos, blockState.setValue(CONN1, 3), 3);
-                System.out.println("Establishing a south connection");
+                retstate = retstate.setValue(CONN1, Direction.SOUTH);
             } else if (isCompatibleBlock(blockPos, northState, blockPos.north())) {
-                level.setBlock(blockPos, blockState.setValue(CONN1, 1), 3);
-                System.out.println("Establishing a north connection");
+                retstate = retstate.setValue(CONN1, Direction.NORTH);
             } else if (isCompatibleBlock(blockPos, eastState, blockPos.east())) {
-                level.setBlock(blockPos, blockState.setValue(CONN1, 2), 3);
-                System.out.println("Establishing a east connection");
+                retstate = retstate.setValue(CONN1, Direction.EAST);
             } else if (isCompatibleBlock(blockPos, westState, blockPos.west())) {
-                level.setBlock(blockPos, blockState.setValue(CONN1, 4), 3);
-                System.out.println("Establishing a west connection");
+                retstate = retstate.setValue(CONN1, Direction.WEST);
             }
-            System.out.println("Established connection 1");
-            return;
         }
-        if (connection2.equals(0)) {
-            if (connection1 % 2 == 1) {
+        if (connection2.equals(Direction.DOWN)) {
+            if (retstate.getValue(CONN1).equals(Direction.SOUTH) || retstate.getValue(CONN1).equals(Direction.NORTH)) {
                 if (isCompatibleBlock(blockPos, eastState, blockPos.east())) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 2), 3);
-                    System.out.println("Establishing a east connection 1");
+                    retstate = retstate.setValue(CONN2, Direction.EAST);
                 } else if (isCompatibleBlock(blockPos, westState, blockPos.west())) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 4), 3);
-                    System.out.println("Establishing a west connection 1");
-                } else if (isCompatibleBlock(blockPos, southState, blockPos.south()) && connection1 != 3) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 3), 3);
-                    System.out.println("Establishing a south connection 1");
-                } else if (isCompatibleBlock(blockPos, northState, blockPos.north()) && connection1 != 1) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 1), 3);
-                    System.out.println("Establishing a north connection 1");
+                    retstate = retstate.setValue(CONN1, Direction.WEST);
+                } else if (isCompatibleBlock(blockPos, southState, blockPos.south()) && retstate.getValue(CONN1) != Direction.SOUTH) {
+                    retstate = retstate.setValue(CONN2, Direction.SOUTH);
+                } else if (isCompatibleBlock(blockPos, northState, blockPos.north()) && retstate.getValue(CONN1) != Direction.NORTH) {
+                    retstate = retstate.setValue(CONN2, Direction.NORTH);
                 }
-            } else if (connection1 % 2 == 0) {
+            } else if (retstate.getValue(CONN1).equals(Direction.EAST) || retstate.getValue(CONN1).equals(Direction.WEST)) {
                 if (isCompatibleBlock(blockPos, southState, blockPos.south())) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 3), 3);
-                    System.out.println("Establishing a south connection");
+                    retstate = retstate.setValue(CONN2, Direction.SOUTH);
                 } else if (isCompatibleBlock(blockPos, northState, blockPos.north())) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 1), 3);
-                    System.out.println("Establishing a north connection");
-                } else if (isCompatibleBlock(blockPos, eastState, blockPos.east())  && connection1 != 2) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 2), 3);
-                    System.out.println("Establishing a east connection");
-                } else if (isCompatibleBlock(blockPos, westState, blockPos.west())  && connection1 != 4) {
-                    level.setBlock(blockPos, blockState.setValue(CONN2, 4), 3);
-                    System.out.println("Establishing a west connection");
+                    retstate = retstate.setValue(CONN2, Direction.NORTH);
+                } else if (isCompatibleBlock(blockPos, eastState, blockPos.east())  && retstate.getValue(CONN1) != Direction.EAST) {
+                    retstate = retstate.setValue(CONN2, Direction.EAST);
+                } else if (isCompatibleBlock(blockPos, westState, blockPos.west())  && retstate.getValue(CONN1) != Direction.WEST) {
+                    retstate = retstate.setValue(CONN1, Direction.WEST);
                 }
             }
         }
+        return retstate;
+    }
+
+    public BlockState checkConnections (BlockState blockState, BlockPos blockPos, Level level) {
+        if (blockState.getValue(CONN1) != Direction.DOWN){
+            BlockPos neighborPos = blockPos.relative(blockState.getValue(CONN1));
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (!isCompatibleBlock(blockPos, neighborState, neighborPos)){
+                blockState = blockState.setValue(CONN1,Direction.DOWN);
+            }
+        }
+        if (blockState.getValue(CONN2) != Direction.DOWN){
+            BlockPos neighborPos = blockPos.relative(blockState.getValue(CONN2));
+            BlockState neighborState = level.getBlockState(neighborPos);
+            if (!isCompatibleBlock(blockPos, neighborState, neighborPos)){
+                blockState = blockState.setValue(CONN2,Direction.DOWN);
+            }
+        }
+        return blockState;
     }
 
     private boolean isCompatibleBlock(BlockPos blockPos, BlockState neighborState, BlockPos neighborPos) {
-        HashMap<Integer, Direction> directions = new HashMap<>();
-        directions.put(1, Direction.NORTH);
-        directions.put(3, Direction.SOUTH);
-        directions.put(2, Direction.EAST);
-        directions.put(4, Direction.WEST);
-
-        if (!isComponentBlock(neighborState)) return false;
-        if (isGateBlock(neighborState) && neighborPos.relative(neighborState.getValue(FACING)).equals(blockPos)) return true;
+        if (!codex.isComponentBlock(neighborState)) return false;
+        if (codex.isGateBlock(neighborState) && neighborPos.relative(neighborState.getValue(FACING)).equals(blockPos)) return true;
         if (neighborState.getBlock() instanceof MonoSigBus) {
-            if (neighborState.getValue(CONN1) == 0 || neighborState.getValue(CONN2) == 0) return true;
-            else if (neighborPos.relative(directions.get(neighborState.getValue(CONN1))).equals(blockPos)
-            || neighborPos.relative(directions.get(neighborState.getValue(CONN2))).equals(blockPos)) {
-                return true;
-            }
+            if (neighborState.getValue(CONN1) == Direction.DOWN || neighborState.getValue(CONN2) == Direction.DOWN) return true;
+            else if (iamConn(blockPos, neighborPos, neighborState.getValue(CONN1)) ||
+                    iamConn(blockPos, neighborPos, neighborState.getValue(CONN2))) return true;
         }
         System.out.println("Not Compatible");
         return false;
     }
 
-    private boolean isComponentBlock(BlockState blockState) {
-        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_COMPONENT);
-    }
-
-    private boolean isGateBlock(BlockState blockState) {
-        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_GATE);
-    }
 
     @Override
     public BlockState getStateForPlacement(BlockPlaceContext context){
-        Direction facingDirection = context.getHorizontalDirection();
-        return this.defaultBlockState().setValue(SIGNAL_1, false);
+        Level level = context.getLevel();
+        BlockPos pos = context.getClickedPos();
+
+        BlockState state = this.defaultBlockState().setValue(SIGNAL_1, false)
+                .setValue(CONN1, Direction.DOWN)
+                .setValue(CONN2, Direction.DOWN)
+                .setValue(POWERSOURCES, 0)
+                .setValue(ISSOURCE, false);
+
+        BlockState newState = getNewConnections(state, pos, level);
+        if (newState.getValue(CONN1) != Direction.DOWN){
+            BlockState state1 = isPowered(newState,level.getBlockState(pos.relative(newState.getValue(CONN1))));
+            if (state1.getValue(POWERSOURCES) > 0){
+                newState = newState.setValue(POWERSOURCES, newState.getValue(POWERSOURCES) + 1).setValue(SIGNAL_1, true);
+                if (codex.isGateBlock(state1)){}
+            }
+        }
+        if (newState.getValue(CONN2) != Direction.DOWN){
+            BlockState state2 = isPowered(newState, level.getBlockState(pos.relative(newState.getValue(CONN2))));
+            if (state2.getValue(POWERSOURCES) > 0){
+                newState = newState.setValue(POWERSOURCES, newState.getValue(POWERSOURCES) + 1).setValue(SIGNAL_1, true);
+            }
+        }
+
+        return newState;
     }
 
     @Override
     public void onPlace(BlockState state, Level level, BlockPos pos, BlockState oldState, boolean movedByPiston) {
         if (level.isClientSide) return;
-        getConn(state, pos, level);
+        System.out.println("onPlace running");
         level.scheduleTick(pos, this, PROPAGATION_DELAY, TickPriority.HIGH);
     }
 
     @Override
     public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         if (!level.isClientSide && !newState.is(this)) {
-            // Notify the block directly in front that we're gone
-            RelativeDirections relativeDirections = new RelativeDirections(pos, Direction.NORTH);
-            level.neighborChanged(relativeDirections.frontNeighbor,this, pos);
+            // Notify the CONN blocks directly that we're gone
+            level.neighborChanged(pos.relative(state.getValue(CONN1)),this, pos);
+//            level.neighborChanged(pos.relative(state.getValue(CONN2)),this, pos);
         }
         super.onRemove(state, level, pos, newState, movedByPiston);
     }
@@ -169,14 +232,23 @@ public static final IntegerProperty CONN = IntegerProperty.create("conn",0, 12);
     @Override
     public void neighborChanged(BlockState state, Level level, BlockPos pos, Block neighborBlock, BlockPos neighborPos, boolean movedByPiston) {
         if (level.isClientSide) return;
-
-        RelativeDirections relativePositions = new RelativeDirections(pos, Direction.NORTH);
         BlockState neighborState = level.getBlockState(neighborPos);
-        getConn(state, pos, level);
+        BlockState connectionState = getNewConnections(state, pos, level);
+        if (!isCompatibleBlock(pos, neighborState,neighborPos)) return;
+        BlockState poweredState = isPowered(state, neighborState);
+        BlockState newState = state
+                .setValue(CONN1, connectionState.getValue(CONN1))
+                .setValue(CONN2, connectionState.getValue(CONN2))
+                .setValue(POWERSOURCES, poweredState.getValue(POWERSOURCES))
+                .setValue(SIGNAL_1, poweredState.getValue(SIGNAL_1))
+                .setValue(ISSOURCE, poweredState.getValue(ISSOURCE));
+
+        level.setBlock(pos, newState, 3);
     }
 
     @Override
     public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+        if (level.isClientSide) return;
 
     }
 
@@ -184,8 +256,9 @@ public static final IntegerProperty CONN = IntegerProperty.create("conn",0, 12);
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         builder.add(SIGNAL_1)
-                .add(CONN)
+                .add(POWERSOURCES)
                 .add(CONN1)
-                .add(CONN2);
+                .add(CONN2)
+                .add(ISSOURCE);
     }
 }

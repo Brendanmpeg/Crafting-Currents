@@ -2,6 +2,7 @@ package com.brendanmpeg.craftingcurrents.block.custom;
 
 import com.brendanmpeg.craftingcurrents.utils.ModTags;
 import com.brendanmpeg.craftingcurrents.utils.RelativeDirections;
+import com.brendanmpeg.craftingcurrents.utils.Codex;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -21,6 +22,7 @@ import net.minecraft.world.ticks.TickPriority;
 
 public class BiAndGate extends Block {
 
+    Codex codex = new Codex();
     /* Minecraft States */
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
@@ -92,7 +94,7 @@ public class BiAndGate extends Block {
 
         RelativeDirections relativePositions = new RelativeDirections(pos, state.getValue(FACING));
         BlockState rearNeighborState = level.getBlockState(relativePositions.rearNeighbor);
-        if (!isComponentBlock(rearNeighborState)) return;
+        if (!codex.isComponentBlock(rearNeighborState)) return;
 
         if (!isGateBlock(rearNeighborState) && rearNeighborState.getValue(FACING) == relativePositions.front) {
             boolean signal_1 = rearNeighborState.getValue(SIGNAL_1);
@@ -119,9 +121,6 @@ public class BiAndGate extends Block {
         return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_GATE);
     }
 
-    private boolean isComponentBlock(BlockState blockState) {
-        return blockState.is(ModTags.Blocks.CRAFTING_CURRENTS_COMPONENT);
-    }
 
     // Register the properties Ex. FACING
     @Override

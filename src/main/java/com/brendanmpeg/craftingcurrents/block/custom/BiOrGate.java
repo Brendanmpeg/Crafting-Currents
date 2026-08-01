@@ -1,5 +1,6 @@
 package com.brendanmpeg.craftingcurrents.block.custom;
 
+import com.brendanmpeg.craftingcurrents.utils.Codex;
 import com.brendanmpeg.craftingcurrents.utils.RelativeDirections;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -20,6 +21,7 @@ import net.minecraft.world.ticks.TickPriority;
 
 public class BiOrGate extends Block {
 
+    Codex codex = new Codex();
     /* Minecraft States */
     public static final DirectionProperty FACING = HorizontalDirectionalBlock.FACING;
     private static final VoxelShape SHAPE = Block.box(0.0, 0.0, 0.0, 16.0, 2.0, 16.0);
