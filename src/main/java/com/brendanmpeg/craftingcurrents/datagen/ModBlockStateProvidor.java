@@ -54,7 +54,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             // ── CONN1 = 0 (fully disconnected) ───────────────────────────────
             builder.part()
                     .modelFile(straight).rotationY(0).addModel()
-                    .condition(MonoSigBus.SIGNAL_1, signal)
+                    .condition(MonoSigBus.SIGNAL, signal)
                     .condition(MonoSigBus.CONN1,  Direction.DOWN)
                     .end();
 
@@ -63,7 +63,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             for (Direction c1 : new Direction[]{Direction.NORTH, Direction.SOUTH}) {
                 builder.part()
                         .modelFile(straight).rotationY(0).addModel()
-                        .condition(MonoSigBus.SIGNAL_1, signal)
+                        .condition(MonoSigBus.SIGNAL, signal)
                         .condition(MonoSigBus.CONN1, c1)
                         .condition(MonoSigBus.CONN2, Direction.DOWN)
                         .end();
@@ -72,7 +72,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             for (Direction c1 : new Direction[]{Direction.EAST, Direction.WEST}) {
                 builder.part()
                         .modelFile(straight).rotationY(90).addModel()
-                        .condition(MonoSigBus.SIGNAL_1, signal)
+                        .condition(MonoSigBus.SIGNAL, signal)
                         .condition(MonoSigBus.CONN1, c1)
                         .condition(MonoSigBus.CONN2, Direction.DOWN)
                         .end();
@@ -82,7 +82,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             for (Direction[] pair : new Direction[][]{{Direction.NORTH, Direction.SOUTH}, {Direction.SOUTH, Direction.NORTH}}) {
                 builder.part()
                         .modelFile(straight).rotationY(0).addModel()
-                        .condition(MonoSigBus.SIGNAL_1, signal)
+                        .condition(MonoSigBus.SIGNAL, signal)
                         .condition(MonoSigBus.CONN1, pair[0])
                         .condition(MonoSigBus.CONN2, pair[1])
                         .end();
@@ -90,7 +90,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             for (Direction[] pair : new Direction[][]{{Direction.EAST, Direction.WEST}, {Direction.WEST, Direction.EAST}}) {
                 builder.part()
                         .modelFile(straight).rotationY(90).addModel()
-                        .condition(MonoSigBus.SIGNAL_1, signal)
+                        .condition(MonoSigBus.SIGNAL, signal)
                         .condition(MonoSigBus.CONN1, pair[0])
                         .condition(MonoSigBus.CONN2, pair[1])
                         .end();
@@ -110,7 +110,7 @@ public class ModBlockStateProvidor extends BlockStateProvider {
             for (CornerCase c : cornerCases) {
                 builder.part()
                         .modelFile(corner).rotationY(c.rotation).addModel()
-                        .condition(MonoSigBus.SIGNAL_1, signal)
+                        .condition(MonoSigBus.SIGNAL, signal)
                         .condition(MonoSigBus.CONN1, c.conn1)
                         .condition(MonoSigBus.CONN2, c.conn2)
                         .end();
